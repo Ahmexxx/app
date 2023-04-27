@@ -26,8 +26,31 @@ def main():
     plt.plot(x, y_test, label='real y')
     plt.plot(x, y_pred, label="predicted y'")
     model.predict([[2,2,2,2]])[0]
-    st.file_uploader('carica file')
+    uploaded= st.file_uploader('carica file')
+    if uploaded is not None:#per evitare che dia errore 
+        df=pd.read_csv(uploaded)#una volta caricato il csv lo trasforma in dataFrame
+        st.dataframe(df)
+        pred = model.predict(df.to_numpy())
+        #st.write(pred) #per stampare solo la predizione
+        df['prediction']=pred
+        st.dataframe(df)#stampo sia la predizione che il dataframe
 
+        #esportare excel finale
+        import io
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            # Write each dataframe to a different worksheet.
+            df.to_excel(writer, sheet_name='Sheet1', index=False)
+            # Close the Pandas Excel writer and output the Excel file to the buffer
+            writer.save()
+
+            download2 = st.download_button(
+                label="Download Excel",
+                data=buffer,
+                file_name='classificazione.xlsx',
+                mime='application/vnd.ms-excel')
+
+        
 
 
 
